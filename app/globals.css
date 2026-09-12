@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #131315;
+    --foreground: #e5e1e4;
+  }
+
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #131315;
+    color: #e5e1e4;
+    font-family: var(--font-jakarta), system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: #d4af37;
+    color: #0e0e10;
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0e0e10;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a2c;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+  }
+}
+
+@layer components {
+  /* Imperial Gold CTA Gradient */
+  .btn-imperial {
+    background: linear-gradient(135deg, #e5c158 0%, #d4af37 50%, #b38e22 100%);
+    color: #0d0d0f;
+    font-weight: 600;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+  }
+
+  .btn-imperial:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.35);
+  }
+
+  .btn-imperial:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
+  }
+
+  /* Secondary Ghost Gold Button */
+  .btn-ghost-gold {
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: #faf7f2;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-ghost-gold:hover {
+    background: rgba(212, 175, 55, 0.08);
+    border-color: #d4af37;
+    color: #f2ca50;
+  }
+
+  /* Subtle Hairline Gold Border */
+  .border-gold-subtle {
+    border-color: rgba(212, 175, 55, 0.16);
+  }
+
+  /* Frosted Glass Overlay */
+  .glass-card {
+    background: rgba(26, 22, 19, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(212, 175, 55, 0.14);
+  }
+}
+

@@ -173,6 +173,11 @@ The visual strategy merges **tactile luxury** with **modern dark minimalism**:
 - **Architectural Rhythm:** Generous spacing, structured hairline dividers reminiscent of filigree jaali screens, and subtle warm-toned ambient glows create tangible depth.
 
 ## Colors
+> **Note:** The YAML frontmatter at the top of this file is the single 
+> source of truth for all color values used in code (`tailwind.config.ts`). 
+> The prose descriptions below are illustrative/conceptual only and may 
+> not exactly match implemented hex values — always check the frontmatter 
+> or `tailwind.config.ts` directly when writing code.
 
 The palette embraces the warmth of charcoal braziers and gilded banquet vessels, calibrated exclusively for dark mode to preserve richness and appetite appeal.
 

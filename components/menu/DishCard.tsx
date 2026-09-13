@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MenuItem } from "@/lib/data/mock-menu";
+import { MenuItem } from "@/lib/types/menu";
 import { useCart } from "@/lib/context/cart-context";
 import { SpiceMeter } from "@/components/ui/SpiceMeter";
 import { formatPKR } from "@/lib/utils";

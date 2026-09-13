@@ -77,7 +77,7 @@ INSERT INTO public.menu_items (
   dietary_tags, spice_level, preparation_time_minutes, is_available, is_featured, rating, review_count
 ) VALUES
   (
-    'm1000000-0000-0000-0000-000000000001',
+    'a1000000-0000-0000-0000-000000000001',
     'c1000000-0000-0000-0000-000000000001',
     'Shahi Dum Pukht Mutton Biryani',
     'shahi-dum-pukht-mutton-biryani',
@@ -95,7 +95,7 @@ INSERT INTO public.menu_items (
     420
   ),
   (
-    'm1000000-0000-0000-0000-000000000002',
+    'a1000000-0000-0000-0000-000000000002',
     'c1000000-0000-0000-0000-000000000002',
     'Lahori Desi Murgh Karahi',
     'lahori-desi-murgh-karahi',
@@ -113,7 +113,7 @@ INSERT INTO public.menu_items (
     380
   ),
   (
-    'm1000000-0000-0000-0000-000000000003',
+    'a1000000-0000-0000-0000-000000000003',
     'c1000000-0000-0000-0000-000000000003',
     'Charsi Tikka & Lamb Chops',
     'charsi-tikka-lamb-chops',
@@ -131,7 +131,7 @@ INSERT INTO public.menu_items (
     210
   ),
   (
-    'm1000000-0000-0000-0000-000000000004',
+    'a1000000-0000-0000-0000-000000000004',
     'c1000000-0000-0000-0000-000000000004',
     'Nalli Nihari Khas',
     'nalli-nihari-khas',
@@ -149,7 +149,7 @@ INSERT INTO public.menu_items (
     512
   ),
   (
-    'm1000000-0000-0000-0000-000000000005',
+    'a1000000-0000-0000-0000-000000000005',
     'c1000000-0000-0000-0000-000000000002',
     'Shinwari Mutton Dumba Karahi',
     'shinwari-mutton-dumba-karahi',
@@ -167,7 +167,7 @@ INSERT INTO public.menu_items (
     195
   ),
   (
-    'm1000000-0000-0000-0000-000000000006',
+    'a1000000-0000-0000-0000-000000000006',
     'c1000000-0000-0000-0000-000000000005',
     'Shahi Roghani Naan',
     'shahi-roghani-naan',
@@ -185,7 +185,7 @@ INSERT INTO public.menu_items (
     310
   ),
   (
-    'm1000000-0000-0000-0000-000000000007',
+    'a1000000-0000-0000-0000-000000000007',
     'c1000000-0000-0000-0000-000000000006',
     'Khas Zafrani Matka Kheer',
     'khas-zafrani-matka-kheer',
@@ -223,4 +223,3 @@ WHERE email IN (
   'admin.tariq@dastarkhwan.internal'
 );
 */
-

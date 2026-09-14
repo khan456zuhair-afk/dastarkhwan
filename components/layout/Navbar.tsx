@@ -15,13 +15,17 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/context/cart-context";
 
 interface NavbarProps {
   cartItemCount?: number;
   cartTotal?: number;
 }
 
-export function Navbar({ cartItemCount = 0, cartTotal = 0 }: NavbarProps) {
+export function Navbar({ cartItemCount, cartTotal }: NavbarProps) {
+  const { totalItems, total } = useCart();
+  const displayCount = cartItemCount !== undefined ? cartItemCount : totalItems;
+  const displayTotal = cartTotal !== undefined ? cartTotal : total;
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -88,13 +92,13 @@ export function Navbar({ cartItemCount = 0, cartTotal = 0 }: NavbarProps) {
             className="relative flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/50 text-on-surface transition-all hover:border-primary/40"
           >
             <ShoppingBag className="w-4 h-4 text-primary" />
-            {cartItemCount > 0 ? (
+            {displayCount > 0 ? (
               <>
                 <span className="hidden md:inline text-xs font-medium text-on-surface">
-                  {cartItemCount} {cartItemCount === 1 ? "item" : "items"} • Rs. {cartTotal.toLocaleString()}
+                  {displayCount} {displayCount === 1 ? "item" : "items"} • Rs. {displayTotal.toLocaleString()}
                 </span>
                 <span className="md:hidden flex items-center justify-center w-4 h-4 rounded-full bg-primary text-on-primary text-[10px] font-bold">
-                  {cartItemCount}
+                  {displayCount}
                 </span>
               </>
             ) : (

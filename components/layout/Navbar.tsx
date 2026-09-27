@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { DastarkhwanLogo } from "@/components/brand/DastarkhwanLogo";
 import {
   MapPin,
@@ -13,9 +13,13 @@ import {
   X,
   Phone,
   Clock,
+  ChevronDown,
+  LogOut,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/context/cart-context";
+import { createClient } from "@/lib/supabase/client";
 
 interface NavbarProps {
   cartItemCount?: number;
@@ -23,11 +27,78 @@ interface NavbarProps {
 }
 
 export function Navbar({ cartItemCount, cartTotal }: NavbarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const { totalItems, total } = useCart();
   const displayCount = cartItemCount !== undefined ? cartItemCount : totalItems;
   const displayTotal = cartTotal !== undefined ? cartTotal : total;
-  const pathname = usePathname();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; email?: string; user_metadata?: { full_name?: string } } | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Check customer auth state via browser Supabase client
+  useEffect(() => {
+    const supabase = createClient();
+
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUser(user);
+          const name = user.user_metadata?.full_name || user.email?.split("@")[0];
+          setDisplayName(name || "Customer");
+        } else {
+          setUser(null);
+          setDisplayName(null);
+        }
+      } catch {
+        setUser(null);
+        setDisplayName(null);
+      }
+    };
+
+    checkUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        const name = session.user.user_metadata?.full_name || session.user.email?.split("@")[0];
+        setDisplayName(name || "Customer");
+      } else {
+        setUser(null);
+        setDisplayName(null);
+      }
+    });
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setAccountDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setDisplayName(null);
+    setAccountDropdownOpen(false);
+    setMobileMenuOpen(false);
+    router.push("/");
+    router.refresh();
+  };
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -106,14 +177,67 @@ export function Navbar({ cartItemCount, cartTotal }: NavbarProps) {
             )}
           </Link>
 
-          {/* Account / Admin Link */}
-          <Link
-            href="/account"
-            aria-label="Account"
-            className="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-primary transition-colors"
-          >
-            <User className="w-4 h-4" />
-          </Link>
+          {/* Customer Account / Auth Trigger */}
+          {user ? (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-primary/30 text-xs text-on-surface transition-all hover:border-primary cursor-pointer"
+                aria-label="Account Menu"
+              >
+                <div className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center font-serif text-[11px] font-bold">
+                  {displayName ? displayName.charAt(0).toUpperCase() : "U"}
+                </div>
+                <span className="hidden md:inline font-medium max-w-[110px] truncate text-on-surface">
+                  {displayName}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-primary" />
+              </button>
+
+              {/* Account Dropdown */}
+              {accountDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-surface-container-high border border-primary/30 rounded-xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in duration-150">
+                  <div className="px-3 py-2 border-b border-outline-variant/20">
+                    <p className="text-[10px] text-primary font-semibold uppercase tracking-wider">
+                      Imperial Patron
+                    </p>
+                    <p className="text-xs font-bold text-on-surface truncate">{displayName}</p>
+                    {user?.email && (
+                      <p className="text-[11px] text-on-surface-variant/80 truncate font-mono">
+                        {user.email}
+                      </p>
+                    )}
+                  </div>
+
+                  <Link
+                    href="/menu"
+                    onClick={() => setAccountDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-on-surface hover:bg-surface-container hover:text-primary transition-colors"
+                  >
+                    <ShoppingBag className="w-3.5 h-3.5 text-primary" />
+                    <span>Order Banquet</span>
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-error hover:bg-error/10 transition-colors text-left cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 hover:border-primary/40 text-xs font-semibold text-primary transition-all shadow-sm"
+              aria-label="Sign In"
+            >
+              <User className="w-3.5 h-3.5 text-primary" />
+              <span className="hidden sm:inline">Sign In</span>
+            </Link>
+          )}
 
           {/* Mobile Menu Button */}
           <button
@@ -129,6 +253,47 @@ export function Navbar({ cartItemCount, cartTotal }: NavbarProps) {
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-surface-container-lowest/98 border-b border-outline-variant/30 px-6 py-6 space-y-5 animate-in slide-in-from-top duration-300">
+          {/* User Status Bar in Mobile Menu */}
+          {user ? (
+            <div className="p-3 bg-surface-container rounded-lg border border-primary/30 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-serif text-xs font-bold shrink-0">
+                  {displayName ? displayName.charAt(0).toUpperCase() : "U"}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-on-surface truncate">{displayName}</p>
+                  <p className="text-[10px] text-primary uppercase tracking-wider">
+                    Imperial Patron
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="text-xs text-error font-semibold hover:underline cursor-pointer flex items-center gap-1"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Log Out</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2.5 px-3 rounded-lg bg-surface-container border border-primary/30 text-center text-xs font-semibold text-primary"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-2.5 px-3 rounded-lg btn-imperial text-center text-xs font-semibold"
+              >
+                Create Account
+              </Link>
+            </div>
+          )}
+
           {/* Single Branch Banner */}
           <div className="p-3 bg-surface-container rounded-lg border border-primary/20 flex items-center gap-2.5 text-xs text-on-surface-variant">
             <MapPin className="w-4 h-4 text-primary shrink-0" />
@@ -187,4 +352,3 @@ export function Navbar({ cartItemCount, cartTotal }: NavbarProps) {
     </header>
   );
 }
-

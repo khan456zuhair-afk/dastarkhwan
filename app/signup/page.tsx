@@ -23,7 +23,15 @@ import {
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/";
+  const rawNext = searchParams.get("next");
+  // Ensure safe customer redirect: defaults to /menu, strictly rejects /admin redirects
+  const next =
+    rawNext &&
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    !rawNext.startsWith("/admin")
+      ? rawNext
+      : "/menu";
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -88,7 +96,7 @@ function SignupForm() {
       if (data.user) {
         setIsSuccess(true);
         if (data.session) {
-          setSuccessMessage("Welcome to the Royal Dastarkhwan! Redirecting to your destination...");
+          setSuccessMessage("Welcome to the Royal Dastarkhwan! Redirecting to the Imperial Menu...");
           setTimeout(() => {
             router.push(next);
             router.refresh();
@@ -96,7 +104,7 @@ function SignupForm() {
         } else {
           // If Supabase project requires email confirmation
           setSuccessMessage(
-            "Your imperial account has been registered. Please check your inbox for the confirmation link to complete activation."
+            "Your customer account has been registered. Please check your inbox for the confirmation link to complete activation."
           );
         }
       }
@@ -109,14 +117,14 @@ function SignupForm() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8">
+    <div className="w-full max-w-md space-y-8 select-none">
       {/* Brand Header */}
       <div className="text-center space-y-3">
         <div className="flex justify-center">
           <DastarkhwanLogo size="lg" />
         </div>
 
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full border border-primary/20 text-xs text-primary">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full border border-primary/20 text-xs text-primary shadow-sm">
           <Sparkles className="w-3.5 h-3.5" />
           <span className="font-semibold uppercase tracking-widest text-[10px]">
             Privilege Membership
@@ -124,9 +132,9 @@ function SignupForm() {
         </div>
 
         <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-on-surface">
-          Create Your <span className="italic text-primary">Account</span>
+          Create Customer <span className="italic text-primary">Account</span>
         </h1>
-        <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
+        <p className="text-xs text-on-surface-variant max-w-sm mx-auto leading-relaxed">
           Join our dining circle to save delivery addresses, view order history, and access royal
           banquet privileges.
         </p>
@@ -135,7 +143,7 @@ function SignupForm() {
       {/* Form Card */}
       <div className="p-6 sm:p-8 bg-surface-container rounded-2xl border border-primary/20 shadow-2xl space-y-6">
         {errorMessage && (
-          <div className="p-3.5 bg-error/10 border border-error/30 rounded-lg flex items-start gap-3 text-xs text-error">
+          <div className="p-3.5 bg-error/10 border border-error/30 rounded-lg flex items-start gap-3 text-xs text-error animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
@@ -256,7 +264,7 @@ function SignupForm() {
                 <span>Creating Your Account...</span>
               ) : (
                 <>
-                  <span>Create Account</span>
+                  <span>Create Customer Account</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -313,4 +321,3 @@ export default function SignupPage() {
     </div>
   );
 }
-

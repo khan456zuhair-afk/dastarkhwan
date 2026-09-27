@@ -13,16 +13,22 @@ import {
   ArrowRight,
   ArrowLeft,
   AlertCircle,
-  Sparkles,
   ShieldCheck,
+  User,
 } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawNext = searchParams.get("next") || "/";
-  // Safe redirect target validation (avoid open redirects)
-  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+  const rawNext = searchParams.get("next");
+  // Ensure safe customer redirect: defaults to /menu, strictly rejects /admin redirects
+  const next =
+    rawNext &&
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    !rawNext.startsWith("/admin")
+      ? rawNext
+      : "/menu";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,12 +63,14 @@ function LoginForm() {
 
       if (error) {
         console.error("Login error:", error);
-        setErrorMessage(error.message || "Invalid email or password. Please verify your credentials.");
+        setErrorMessage(
+          error.message || "Invalid email or password. Please verify your credentials."
+        );
         setIsLoading(false);
         return;
       }
 
-      // Successful login
+      // Successful customer login: redirect to /menu or requested destination
       router.push(next);
       router.refresh();
     } catch (err: any) {
@@ -73,32 +81,32 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md space-y-8">
+    <div className="w-full max-w-md space-y-8 select-none">
       {/* Brand Header */}
       <div className="text-center space-y-3">
         <div className="flex justify-center">
           <DastarkhwanLogo size="lg" />
         </div>
 
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full border border-primary/20 text-xs text-primary">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full border border-primary/20 text-xs text-primary shadow-sm">
+          <User className="w-3.5 h-3.5" />
           <span className="font-semibold uppercase tracking-widest text-[10px]">
-            Guest & Dining Portal
+            Customer Dining Portal
           </span>
         </div>
 
         <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-on-surface">
-          Welcome to <span className="italic text-primary">Dastarkhwan</span>
+          Customer <span className="italic text-primary">Sign In</span>
         </h1>
-        <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-          Sign in to your imperial dining account to view active banquet orders and saved addresses.
+        <p className="text-xs text-on-surface-variant max-w-sm mx-auto leading-relaxed">
+          Sign in to your customer dining account to track active banquet orders, view delivery history, and reserve tables.
         </p>
       </div>
 
       {/* Form Card */}
       <div className="p-6 sm:p-8 bg-surface-container rounded-2xl border border-primary/20 shadow-2xl space-y-6">
         {errorMessage && (
-          <div className="p-3.5 bg-error/10 border border-error/30 rounded-lg flex items-start gap-3 text-xs text-error">
+          <div className="p-3.5 bg-error/10 border border-error/30 rounded-lg flex items-start gap-3 text-xs text-error animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
@@ -160,10 +168,10 @@ function LoginForm() {
             className="w-full py-3 btn-imperial rounded-lg text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer mt-2 disabled:opacity-50"
           >
             {isLoading ? (
-              <span>Signing In...</span>
+              <span>Signing In to Dining Circle...</span>
             ) : (
               <>
-                <span>Sign In to Dastarkhwan</span>
+                <span>Sign In as Customer</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -178,7 +186,7 @@ function LoginForm() {
               href={`/signup?next=${encodeURIComponent(next)}`}
               className="text-primary font-semibold hover:underline"
             >
-              Create Account
+              Create Customer Account
             </Link>
           </p>
 
@@ -210,7 +218,7 @@ export default function LoginPage() {
       <Suspense
         fallback={
           <div className="p-8 text-center text-sm text-on-surface-variant">
-            Loading Dining Portal...
+            Loading Customer Portal...
           </div>
         }
       >
@@ -219,4 +227,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DastarkhwanLogo } from "@/components/brand/DastarkhwanLogo";
 import { createClient } from "@/lib/supabase/client";
-import { Lock, Mail, Eye, EyeOff, ShieldAlert, ArrowLeft } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, ShieldAlert, ArrowLeft, ShieldCheck } from "lucide-react";
 
 function AdminLoginForm() {
   const router = useRouter();
@@ -35,61 +35,63 @@ function AdminLoginForm() {
 
       if (error) {
         // Enforce generic message to prevent username enumeration
-        setErrorMessage("Invalid email or password. Please verify your credentials.");
+        setErrorMessage("Invalid credentials. Please verify your administrative email and password.");
         setIsLoading(false);
         return;
       }
 
       if (data.user) {
-        // Check role in profiles
-        const { data: profile } = await supabase
+        // Verify role strictly in public.profiles table
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", data.user.id)
           .single();
 
         if (profile && (profile.role === "admin" || profile.role === "staff")) {
+          // Authorized administrator
           router.push(next);
           router.refresh();
         } else {
-          // Log out immediately if not admin
+          // Immediately revoke session for non-admin accounts
           await supabase.auth.signOut();
-          setErrorMessage("Access Denied: Your account does not have administrative privileges.");
+          setErrorMessage(
+            "Access Denied: This portal is strictly restricted to administrators. Diners and customers must use the Customer Sign In."
+          );
           setIsLoading(false);
         }
       }
     } catch {
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      setErrorMessage("An unexpected error occurred during administrative verification. Please try again.");
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md space-y-8">
+    <div className="w-full max-w-md space-y-8 select-none">
       {/* Brand Header */}
       <div className="text-center space-y-3">
         <div className="flex justify-center">
           <DastarkhwanLogo size="lg" />
         </div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full border border-primary/20 text-xs text-primary">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container rounded-full border border-primary/20 text-xs text-primary shadow-sm">
           <Lock className="w-3.5 h-3.5" />
           <span className="font-semibold uppercase tracking-widest text-[10px]">
-            Administrative Haven
+            Administrator Gateway
           </span>
         </div>
         <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-on-surface">
           Staff & Management Portal
         </h1>
-        <p className="text-xs text-on-surface-variant max-w-sm mx-auto">
-          Authorized access only. Dedicated terminal for orders, reservations, POS sales, and
-          kitchen management.
+        <p className="text-xs text-on-surface-variant max-w-sm mx-auto leading-relaxed">
+          Authorized personnel only. Direct console access for live kitchen orders, table reservations, and culinary inventory.
         </p>
       </div>
 
       {/* Login Form Container */}
       <div className="p-6 sm:p-8 bg-surface-container rounded-2xl border border-primary/20 shadow-2xl space-y-6">
         {errorMessage && (
-          <div className="p-3.5 bg-error-container/40 border border-error/40 rounded-lg flex items-start gap-3 text-xs text-error">
+          <div className="p-3.5 bg-error-container/40 border border-error/40 rounded-lg flex items-start gap-3 text-xs text-error animate-in fade-in duration-200">
             <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
@@ -109,7 +111,7 @@ function AdminLoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin.name@dastarkhwan.internal"
-                className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-sm text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-sm text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-xs"
               />
             </div>
           </div>
@@ -120,15 +122,7 @@ function AdminLoginForm() {
               <label className="block text-xs font-medium text-on-surface-variant">
                 Password
               </label>
-              <button
-                type="button"
-                onClick={() =>
-                  alert("Please contact your system administrator to initiate a secure password reset link.")
-                }
-                className="text-[11px] text-primary hover:underline cursor-pointer"
-              >
-                Forgot Password?
-              </button>
+              <span className="text-[11px] text-primary/80 font-mono">RBAC Enforced</span>
             </div>
             <div className="relative">
               <Lock className="w-4 h-4 text-outline absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -138,7 +132,7 @@ function AdminLoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-sm text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                className="w-full pl-10 pr-10 py-2.5 bg-surface-container-lowest border border-outline-variant/60 rounded-lg text-sm text-on-surface placeholder:text-outline/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono"
               />
               <button
                 type="button"
@@ -157,19 +151,31 @@ function AdminLoginForm() {
             className="w-full py-3 btn-imperial rounded-lg text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer mt-2 disabled:opacity-50"
           >
             {isLoading ? (
-              <span>Authenticating with Supabase...</span>
+              <span>Verifying Administrative Role...</span>
             ) : (
               <>
                 <Lock className="w-4 h-4" />
-                <span>Authenticate & Enter Portal</span>
+                <span>Sign In to Admin Console</span>
               </>
             )}
           </button>
         </form>
 
-        <div className="pt-2 border-t border-outline-variant/20 text-[11px] text-on-surface-variant/80 text-center space-y-1">
-          <p>Protected by Supabase Auth with Row-Level Security.</p>
-          <p className="text-outline">All access attempts are logged for audit compliance.</p>
+        {/* Separation Link to Customer Login */}
+        <div className="pt-3 border-t border-outline-variant/20 text-center space-y-2">
+          <p className="text-xs text-on-surface-variant">
+            Are you a dining guest?{" "}
+            <Link
+              href="/login"
+              className="text-primary font-semibold hover:underline inline-flex items-center gap-1"
+            >
+              <span>Customer Sign In</span>
+            </Link>
+          </p>
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-tertiary font-mono">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Strict Role-Based Access Control (RBAC)</span>
+          </div>
         </div>
       </div>
     </div>
@@ -203,4 +209,3 @@ export default function AdminLoginPage() {
     </div>
   );
 }
-

@@ -232,10 +232,10 @@ export function Navbar({ cartItemCount, cartTotal }: NavbarProps) {
             <Link
               href="/login"
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 hover:border-primary/40 text-xs font-semibold text-primary transition-all shadow-sm"
-              aria-label="Sign In"
+              aria-label="Customer Sign In"
             >
               <User className="w-3.5 h-3.5 text-primary" />
-              <span className="hidden sm:inline">Sign In</span>
+              <span className="hidden sm:inline">Customer Sign In</span>
             </Link>
           )}
 
@@ -282,7 +282,7 @@ export function Navbar({ cartItemCount, cartTotal }: NavbarProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 className="py-2.5 px-3 rounded-lg bg-surface-container border border-primary/30 text-center text-xs font-semibold text-primary"
               >
-                Sign In
+                Customer Sign In
               </Link>
               <Link
                 href="/signup"

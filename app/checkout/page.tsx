@@ -165,9 +165,12 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      // Build items array strictly with menu_item_id, quantity, and special_instructions
+      // UUID validation regex to ensure legacy/dummy IDs (like "item-3") map safely to null instead of crashing Supabase RPC
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+      // Build items payload safely with UUID verification[cite: 8]
       const itemsPayload = items.map((cartItem) => ({
-        menu_item_id: cartItem.menuItem.id,
+        menu_item_id: uuidRegex.test(cartItem.menuItem.id) ? cartItem.menuItem.id : null,
         quantity: cartItem.quantity,
         special_instructions: cartItem.specialInstructions || null,
       }));
